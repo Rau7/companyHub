@@ -10,4 +10,10 @@
     <li>AdminUserSeed created and added to DBSeeder</li>
     <li>is_admin added to Users table</li>
 </ul>
+ <br />
  
+<h4>2-tablesAdded</h4>
+<ul>
+    <li>companies table created, migrated</li>
+    <li>employees table created, migrated</li>
+</ul>
