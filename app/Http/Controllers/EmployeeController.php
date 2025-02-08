@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
-use App\Http\Resources\EmployeeResource;
+use App\Models\Company;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Inertia\Inertia;
 
 class EmployeeController extends Controller
 {
@@ -14,8 +14,9 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-        $employees = Employee::with('company')->paginate(15);
-        return EmployeeResource::collection($employees);
+        return Inertia::render('Employees/Index', [
+            'employees' => Employee::with('company')->get()
+        ]);
     }
 
     /**
@@ -23,7 +24,9 @@ class EmployeeController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Employees/Create', [
+            'companies' => Company::all()
+        ]);
     }
 
     /**
@@ -34,58 +37,55 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:employees,email',
-            'phone' => 'nullable|string',
             'company_id' => 'required|exists:companies,id',
+            'email' => 'required|email|unique:employees,email',
+            'phone' => 'nullable|string|max:255',
         ]);
 
-        $employee = Employee::create($validated);
-        return new EmployeeResource($employee->load('company'));
-    }
+        Employee::create($validated);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        $employee = Employee::with('company')->findOrFail($id);
-        return new EmployeeResource($employee);
+        return redirect()->route('employees.index')
+            ->with('message', 'Çalışan başarıyla oluşturuldu.');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Employee $employee)
     {
-        //
+        return Inertia::render('Employees/Edit', [
+            'employee' => $employee,
+            'companies' => Company::all()
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Employee $employee)
     {
-        $employee = Employee::findOrFail($id);
-        
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:employees,email,' . $employee->id,
-            'phone' => 'nullable|string',
             'company_id' => 'required|exists:companies,id',
+            'email' => 'required|email|unique:employees,email,' . $employee->id,
+            'phone' => 'nullable|string|max:255',
         ]);
 
         $employee->update($validated);
-        return new EmployeeResource($employee->load('company'));
+
+        return redirect()->route('employees.index')
+            ->with('message', 'Çalışan başarıyla güncellendi.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Employee $employee)
     {
-        $employee = Employee::findOrFail($id);
         $employee->delete();
-        return response()->json(null, Response::HTTP_NO_CONTENT);
+
+        return redirect()->route('employees.index')
+            ->with('message', 'Çalışan başarıyla silindi.');
     }
 }

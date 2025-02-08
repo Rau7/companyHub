@@ -3,71 +3,63 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
-use App\Http\Resources\CompanyResource;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Inertia\Inertia;
 
 class CompanyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $companies = Company::paginate(15);
-        return CompanyResource::collection($companies);
+        return Inertia::render('Companies/Index', [
+            'companies' => Company::all()
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
+    public function create()
     {
-        $company = Company::findOrFail($id);
-        return new CompanyResource($company);
+        return Inertia::render('Companies/Create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:companies,email',
-            'logo' => 'nullable|string',
             'website' => 'nullable|url',
         ]);
 
-        $company = Company::create($validated);
-        return new CompanyResource($company);
+        Company::create($validated);
+
+        return redirect()->route('companies.index')
+            ->with('message', 'Şirket başarıyla oluşturuldu.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    public function edit(Company $company)
     {
-        $company = Company::findOrFail($id);
-        
+        return Inertia::render('Companies/Edit', [
+            'company' => $company
+        ]);
+    }
+
+    public function update(Request $request, Company $company)
+    {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:companies,email,' . $company->id,
-            'logo' => 'nullable|string',
             'website' => 'nullable|url',
         ]);
 
         $company->update($validated);
-        return new CompanyResource($company);
+
+        return redirect()->route('companies.index')
+            ->with('message', 'Şirket başarıyla güncellendi.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
+    public function destroy(Company $company)
     {
-        $company = Company::findOrFail($id);
         $company->delete();
-        return response()->json(null, Response::HTTP_NO_CONTENT);
+
+        return redirect()->route('companies.index')
+            ->with('message', 'Şirket başarıyla silindi.');
     }
 }
