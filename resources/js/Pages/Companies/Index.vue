@@ -16,6 +16,9 @@
               <thead class="bg-gray-50">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Logo
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Şirket Adı
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -31,9 +34,23 @@
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr v-for="company in companies" :key="company.id">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <img v-if="company.logo_url" :src="company.logo_url" 
+                         class="h-12 w-12 object-cover rounded-full" 
+                         :alt="company.name + ' logo'" />
+                    <div v-else class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                      <span class="text-gray-500 text-xl">{{ company.name.charAt(0) }}</span>
+                    </div>
+                  </td>
                   <td class="px-6 py-4 whitespace-nowrap">{{ company.name }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">{{ company.email }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap">{{ company.website }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <a v-if="company.website" :href="company.website" 
+                       target="_blank" 
+                       class="text-indigo-600 hover:text-indigo-900">
+                      {{ company.website }}
+                    </a>
+                  </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <Link :href="route('companies.edit', company.id)"
                       class="text-indigo-600 hover:text-indigo-900 mr-4">Düzenle</Link>

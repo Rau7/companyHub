@@ -5,13 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
 {
     public function index()
     {
         return Inertia::render('Companies/Index', [
-            'companies' => Company::all()
+            'companies' => Company::all()->map(function ($company) {
+                return [
+                    'id' => $company->id,
+                    'name' => $company->name,
+                    'email' => $company->email,
+                    'website' => $company->website,
+                    'logo_url' => $company->logo ? Storage::url($company->logo) : null,
+                ];
+            })
         ]);
     }
 
@@ -26,7 +35,13 @@ class CompanyController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:companies,email',
             'website' => 'nullable|url',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048|dimensions:min_width=100,min_height=100',
         ]);
+
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('public/logos');
+            $validated['logo'] = str_replace('public/', '', $path);
+        }
 
         Company::create($validated);
 
@@ -37,7 +52,13 @@ class CompanyController extends Controller
     public function edit(Company $company)
     {
         return Inertia::render('Companies/Edit', [
-            'company' => $company
+            'company' => [
+                'id' => $company->id,
+                'name' => $company->name,
+                'email' => $company->email,
+                'website' => $company->website,
+                'logo_url' => $company->logo ? Storage::url($company->logo) : null,
+            ]
         ]);
     }
 
@@ -47,7 +68,18 @@ class CompanyController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:companies,email,' . $company->id,
             'website' => 'nullable|url',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048|dimensions:min_width=100,min_height=100',
         ]);
+
+        if ($request->hasFile('logo')) {
+            // Delete old logo if exists
+            if ($company->logo) {
+                Storage::delete('public/' . $company->logo);
+            }
+            
+            $path = $request->file('logo')->store('public/logos');
+            $validated['logo'] = str_replace('public/', '', $path);
+        }
 
         $company->update($validated);
 
@@ -57,6 +89,10 @@ class CompanyController extends Controller
 
     public function destroy(Company $company)
     {
+        if ($company->logo) {
+            Storage::delete('public/' . $company->logo);
+        }
+        
         $company->delete();
 
         return redirect()->route('companies.index')
