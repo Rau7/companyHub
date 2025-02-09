@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
+use App\Http\Requests\Company\StoreCompanyRequest;
+use App\Http\Requests\Company\UpdateCompanyRequest;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class CompanyController extends Controller
 {
@@ -29,14 +30,9 @@ class CompanyController extends Controller
         return Inertia::render('Companies/Create');
     }
 
-    public function store(Request $request)
+    public function store(StoreCompanyRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:companies,email',
-            'website' => 'nullable|url',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048|dimensions:min_width=100,min_height=100',
-        ]);
+        $validated = $request->validated();
 
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('public/logos');
@@ -62,17 +58,11 @@ class CompanyController extends Controller
         ]);
     }
 
-    public function update(Request $request, Company $company)
+    public function update(UpdateCompanyRequest $request, Company $company)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:companies,email,' . $company->id,
-            'website' => 'nullable|url',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048|dimensions:min_width=100,min_height=100',
-        ]);
+        $validated = $request->validated();
 
         if ($request->hasFile('logo')) {
-            // Delete old logo if exists
             if ($company->logo) {
                 Storage::delete('public/' . $company->logo);
             }

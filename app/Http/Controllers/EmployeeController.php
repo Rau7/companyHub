@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\Company;
+use App\Http\Requests\Employee\StoreEmployeeRequest;
+use App\Http\Requests\Employee\UpdateEmployeeRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -32,16 +34,10 @@ class EmployeeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreEmployeeRequest $request)
     {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'company_id' => 'required|exists:companies,id',
-            'email' => 'required|email|unique:employees,email',
-            'phone' => 'nullable|string|max:255',
-        ]);
-
+        $validated = $request->validated();
+        
         Employee::create($validated);
 
         return redirect()->route('employees.index')
@@ -62,16 +58,10 @@ class EmployeeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Employee $employee)
+    public function update(UpdateEmployeeRequest $request, Employee $employee)
     {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'company_id' => 'required|exists:companies,id',
-            'email' => 'required|email|unique:employees,email,' . $employee->id,
-            'phone' => 'nullable|string|max:255',
-        ]);
-
+        $validated = $request->validated();
+        
         $employee->update($validated);
 
         return redirect()->route('employees.index')
