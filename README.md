@@ -65,6 +65,13 @@ A RESTful API service built with Laravel and Vue.js for managing companies and t
 -   Added error handling
 -   Enhanced user input security
 
+### 10. Pagination & API Enhancements
+
+-   Added pagination (15 items per page)
+-   Separated web and API endpoints
+-   Enhanced API responses with proper JSON structure
+-   Added pagination support to API responses
+
 ## Technologies Used
 
 -   Laravel 10
@@ -124,19 +131,106 @@ npm run dev
 -   Company management (CRUD operations)
 -   Employee management (CRUD operations)
 -   File upload for company logos
--   Pagination
+-   Pagination (15 items per page)
 -   Form validation
 -   Responsive design
+-   RESTful API with JSON responses
 
 ## API Endpoints
 
--   GET /api/companies - List all companies
--   POST /api/companies - Create a new company
--   GET /api/companies/{id} - Get company details
--   PUT /api/companies/{id} - Update company
--   DELETE /api/companies/{id} - Delete company
--   GET /api/employees - List all employees
--   POST /api/employees - Create a new employee
--   GET /api/employees/{id} - Get employee details
--   PUT /api/employees/{id} - Update employee
--   DELETE /api/employees/{id} - Delete employee
+### Companies
+
+```bash
+# List all companies (paginated, 15 per page)
+GET /api/companies
+GET /api/companies?page=2
+
+# Get a specific company
+GET /api/companies/{id}
+
+# Create a new company
+POST /api/companies
+Content-Type: application/json
+{
+    "name": "Company Name",
+    "email": "company@example.com",
+    "website": "https://example.com",
+    "logo": "file upload"
+}
+
+# Update a company
+PUT /api/companies/{id}
+Content-Type: application/json
+{
+    "name": "Updated Company Name",
+    "email": "updated@example.com",
+    "website": "https://updated.com"
+}
+
+# Delete a company
+DELETE /api/companies/{id}
+```
+
+### Employees
+
+```bash
+# List all employees (paginated, 15 per page)
+GET /api/employees
+GET /api/employees?page=2
+
+# Get a specific employee
+GET /api/employees/{id}
+
+# Create a new employee
+POST /api/employees
+Content-Type: application/json
+{
+    "first_name": "John",
+    "last_name": "Doe",
+    "company_id": 1,
+    "email": "john@example.com",
+    "phone": "1234567890"
+}
+
+# Update an employee
+PUT /api/employees/{id}
+Content-Type: application/json
+{
+    "first_name": "John Updated",
+    "last_name": "Doe Updated",
+    "company_id": 2,
+    "email": "updated@example.com",
+    "phone": "0987654321"
+}
+
+# Delete an employee
+DELETE /api/employees/{id}
+```
+
+## API Response Format
+
+### Success Response
+
+```json
+{
+    "data": [...],
+    "current_page": 1,
+    "per_page": 15,
+    "total": 50,
+    "last_page": 4,
+    "next_page_url": "http://localhost:8000/api/companies?page=2",
+    "prev_page_url": null
+}
+```
+
+### Error Response
+
+```json
+{
+    "message": "The given data was invalid.",
+    "errors": {
+        "email": ["The email field is required."],
+        "name": ["The name field is required."]
+    }
+}
+```
