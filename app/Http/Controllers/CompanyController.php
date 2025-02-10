@@ -13,15 +13,18 @@ class CompanyController extends Controller
     public function index()
     {
         return Inertia::render('Companies/Index', [
-            'companies' => Company::all()->map(function ($company) {
-                return [
-                    'id' => $company->id,
-                    'name' => $company->name,
-                    'email' => $company->email,
-                    'website' => $company->website,
-                    'logo_url' => $company->logo ? Storage::url($company->logo) : null,
-                ];
-            })
+            'companies' => Company::query()
+                ->select('id', 'name', 'email', 'website', 'logo')
+                ->paginate(15)
+                ->through(function ($company) {
+                    return [
+                        'id' => $company->id,
+                        'name' => $company->name,
+                        'email' => $company->email,
+                        'website' => $company->website,
+                        'logo_url' => $company->logo ? Storage::url($company->logo) : null,
+                    ];
+                })
         ]);
     }
 

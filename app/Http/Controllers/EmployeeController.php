@@ -17,7 +17,10 @@ class EmployeeController extends Controller
     public function index()
     {
         return Inertia::render('Employees/Index', [
-            'employees' => Employee::with('company')->get()
+            'employees' => Employee::query()
+                ->with('company:id,name')
+                ->select('id', 'first_name', 'last_name', 'email', 'phone', 'company_id')
+                ->paginate(15)
         ]);
     }
 
@@ -27,7 +30,7 @@ class EmployeeController extends Controller
     public function create()
     {
         return Inertia::render('Employees/Create', [
-            'companies' => Company::all()
+            'companies' => Company::select('id', 'name')->get()
         ]);
     }
 
@@ -50,8 +53,8 @@ class EmployeeController extends Controller
     public function edit(Employee $employee)
     {
         return Inertia::render('Employees/Edit', [
-            'employee' => $employee,
-            'companies' => Company::all()
+            'employee' => $employee->load('company:id,name'),
+            'companies' => Company::select('id', 'name')->get()
         ]);
     }
 
