@@ -14,14 +14,35 @@ class EmployeeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $employees = Employee::query()
+            ->with('company:id,name')
+            ->select('id', 'first_name', 'last_name', 'email', 'phone', 'company_id')
+            ->paginate(15);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'data' => $employees
+            ]);
+        }
+
         return Inertia::render('Employees/Index', [
-            'employees' => Employee::query()
+            'employees' => $employees
+        ]);
+    }
+
+    /**
+     * API method for displaying a listing of the resource.
+     */
+    public function apiIndex()
+    {
+        return response()->json(
+            Employee::query()
                 ->with('company:id,name')
                 ->select('id', 'first_name', 'last_name', 'email', 'phone', 'company_id')
                 ->paginate(15)
-        ]);
+        );
     }
 
     /**
@@ -31,6 +52,16 @@ class EmployeeController extends Controller
     {
         return Inertia::render('Employees/Create', [
             'companies' => Company::select('id', 'name')->get()
+        ]);
+    }
+
+    /**
+     * API method for displaying the specified resource.
+     */
+    public function apiShow(Employee $employee)
+    {
+        return response()->json([
+            'data' => $employee->load('company:id,name')
         ]);
     }
 
@@ -45,6 +76,19 @@ class EmployeeController extends Controller
 
         return redirect()->route('employees.index')
             ->with('message', 'Çalışan başarıyla oluşturuldu.');
+    }
+
+    /**
+     * API method for storing a newly created resource in storage.
+     */
+    public function apiStore(StoreEmployeeRequest $request)
+    {
+        $employee = Employee::create($request->validated());
+
+        return response()->json([
+            'message' => 'Çalışan başarıyla oluşturuldu.',
+            'data' => $employee->load('company:id,name')
+        ], 201);
     }
 
     /**
@@ -72,6 +116,19 @@ class EmployeeController extends Controller
     }
 
     /**
+     * API method for updating the specified resource in storage.
+     */
+    public function apiUpdate(UpdateEmployeeRequest $request, Employee $employee)
+    {
+        $employee->update($request->validated());
+
+        return response()->json([
+            'message' => 'Çalışan başarıyla güncellendi.',
+            'data' => $employee->load('company:id,name')
+        ]);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Employee $employee)
@@ -80,5 +137,17 @@ class EmployeeController extends Controller
 
         return redirect()->route('employees.index')
             ->with('message', 'Çalışan başarıyla silindi.');
+    }
+
+    /**
+     * API method for removing the specified resource from storage.
+     */
+    public function apiDestroy(Employee $employee)
+    {
+        $employee->delete();
+
+        return response()->json([
+            'message' => 'Çalışan başarıyla silindi.'
+        ]);
     }
 }

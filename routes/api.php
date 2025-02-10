@@ -16,19 +16,15 @@ use App\Http\Controllers\EmployeeController;
 Route::apiResource('users', UserController::class);
 
 // Company Routes
-Route::prefix('companies')->group(function () {
-    Route::get('/', [CompanyController::class, 'index']);
-    Route::get('/{company}', [CompanyController::class, 'show']);
-    Route::post('/', [CompanyController::class, 'store']);
-    Route::put('/{company}', [CompanyController::class, 'update']);
-    Route::delete('/{company}', [CompanyController::class, 'destroy']);
-});
+Route::get('/companies', [CompanyController::class, 'apiIndex']);
+Route::get('/companies/{company}', [CompanyController::class, 'apiShow']);
+Route::post('/companies', [CompanyController::class, 'apiStore']);
+Route::put('/companies/{company}', [CompanyController::class, 'apiUpdate']);
+Route::delete('/companies/{company}', [CompanyController::class, 'apiDestroy']);
 
 // Employee Routes
-Route::prefix('employees')->group(function () {
-    Route::get('/', [EmployeeController::class, 'index']);
-    Route::get('/{employee}', [EmployeeController::class, 'show']);
-    Route::post('/', [EmployeeController::class, 'store']);
-    Route::put('/{employee}', [EmployeeController::class, 'update']);
-    Route::delete('/{employee}', [EmployeeController::class, 'destroy']);
-});
+Route::get('/employees', [EmployeeController::class, 'apiIndex']);
+Route::get('/employees/{employee}', [EmployeeController::class, 'apiShow']);
+Route::post('/employees', [EmployeeController::class, 'apiStore']);
+Route::put('/employees/{employee}', [EmployeeController::class, 'apiUpdate']);
+Route::delete('/employees/{employee}', [EmployeeController::class, 'apiDestroy']);
